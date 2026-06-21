@@ -1,0 +1,16 @@
+# Compiled Java
+*.class
+
+# IDE project files
+.idea/
+*.iml
+.vscode/
+
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Syzygy tablebase data files
+Chess Engine/src/syzygy/
+*.rtbw
+*.rtbz
