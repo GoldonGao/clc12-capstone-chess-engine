@@ -13,6 +13,6 @@ Compile:  `cd "Chess Engine/src"  &&  javac *.java`
 Run the GUI / console / UCI: see `run.bat`, `NewEngine.bat`, `OldEngine.bat`.
 
 ## Endgame tablebases (optional)
-Build `syzygy.dll` and point the engine at a Syzygy folder — see `README_SYZYGY.md`.
+See `README_SYZYGY.md`.
 Tablebase files are NOT included in this repo; download a 3–5 piece Syzygy set
 and place it in `Chess Engine/src/syzygy/`.
