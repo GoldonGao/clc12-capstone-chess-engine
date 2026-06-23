@@ -109,6 +109,7 @@ public class GUI {
         private final JCheckBox engineCheckBox;
         private final JLabel engineClockLabel;
         private final JLabel playerClockLabel;
+        private final JTextField fenField;
         private final JTextArea moveHistoryArea;
 
         private SidePanel(ChessBoardPanel boardPanel) {
@@ -153,11 +154,40 @@ public class GUI {
             playerClockLabel.setBounds(20, 226, 200, 26);
             add(playerClockLabel);
 
+            // Paste a FEN string here and press Enter (or click Load) to set up
+            // that position on the board.
+            JLabel fenLabel = new JLabel("Position (FEN):");
+            fenLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            fenLabel.setBounds(20, 258, 200, 16);
+            add(fenLabel);
+
+            fenField = new JTextField("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            fenField.setFont(new Font("Monospaced", Font.PLAIN, 11));
+            fenField.setBounds(20, 276, 200, 24);
+            fenField.setToolTipText("Paste a FEN and press Enter to load the position");
+            add(fenField);
+
+            Runnable loadFenAction = () -> {
+                if (!boardPanel.loadFen(fenField.getText())) {
+                    JOptionPane.showMessageDialog(this,
+                            "That is not a valid FEN string.",
+                            "Invalid FEN", JOptionPane.ERROR_MESSAGE);
+                }
+            };
+            fenField.addActionListener(event -> loadFenAction.run());
+
+            JButton loadFenButton = new JButton("Load FEN");
+            loadFenButton.setFont(new Font("SansSerif", Font.BOLD, 12));
+            loadFenButton.setFocusable(false);
+            loadFenButton.setBounds(20, 302, 200, 26);
+            loadFenButton.addActionListener(event -> loadFenAction.run());
+            add(loadFenButton);
+
             JPanel moveListPanel = new JPanel();
             moveListPanel.setLayout(new BorderLayout());
             moveListPanel.setBackground(Color.WHITE);
             moveListPanel.setBorder(BorderFactory.createLineBorder(new Color(130, 150, 170)));
-            moveListPanel.setBounds(20, 258, 200, 372);
+            moveListPanel.setBounds(20, 334, 200, 296);
 
             moveHistoryArea = new JTextArea();
             moveHistoryArea.setEditable(false);
@@ -929,6 +959,49 @@ public class GUI {
             selectedSquare = null;
             clearDrag();
             repaint();
+        }
+
+        // Loads a position from a FEN string. Returns false (leaving the current
+        // game untouched) if the FEN is malformed. On success the board is reset to
+        // the given position with an empty move history.
+        private boolean loadFen(String fen) {
+            if (fen == null) {
+                return false;
+            }
+            fen = fen.trim();
+            if (fen.isEmpty()) {
+                return false;
+            }
+            Board candidate = new Board();
+            boolean ok;
+            try {
+                ok = candidate.loadFromFen(fen);
+            } catch (RuntimeException ex) {
+                ok = false;
+            }
+            if (!ok) {
+                return false;
+            }
+            // Reject positions that aren't legal enough to play or search: every
+            // chess position has exactly one king per side.
+            if (Long.bitCount(candidate.getWhiteKing()) != 1
+                    || Long.bitCount(candidate.getBlackKing()) != 1) {
+                return false;
+            }
+            engineRequestId++;
+            activeEngineRequestId = 0;
+            board = candidate;
+            moveHistory.clear();
+            selectedSquare = null;
+            clearDrag();
+            engineThinking = false;
+            gameOver = false;
+            startClock();
+            updateTurnLabel();
+            updateMoveHistory();
+            repaint();
+            maybeStartEngineMove();
+            return true;
         }
 
         private void onEngineSettingChanged() {
