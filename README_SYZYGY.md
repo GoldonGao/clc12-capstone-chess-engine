@@ -2,11 +2,9 @@
 
 ## What this feature is
 
-Chess engines play by searching ahead — they try every possible move, evaluate the resulting positions, and pick the best line. This works well in the middlegame, but endgames with few pieces present a challenge: a position that is a forced win might require 30 or more precise moves to convert, far deeper than the engine can search in real time. Without help, the engine can misplay these positions, missing wins or failing to hold draws.
+Endgame tablebase pre-compute the correct result for every possible position with a small number of pieces.
 
-**Endgame tablebases** solve this by pre-computing the correct result for every possible position with a small number of pieces. Not an estimate — the exact, perfect answer for every configuration, calculated offline and stored in files. When the game reaches one of these positions, the engine looks up the answer in under a millisecond instead of searching.
-
-This project integrates the **Syzygy** tablebase format, the modern standard used by professional engines including Stockfish. A five-piece Syzygy set covers every possible position with five or fewer pieces — over one billion positions — all stored in roughly 1 GB of files.
+This project integrates the **Syzygy** tablebase format, the modern standard used by professional engines including Stockfish. A five-piece Syzygy set covers every possible position with five or fewer pieces all stored in roughly 1 GB of files.
 
 ---
 
@@ -22,7 +20,7 @@ The Syzygy format uses two types of file per material combination (e.g. king + q
 
 ## How it is implemented
 
-Rather than implementing the complex Syzygy file format from scratch (a significant undertaking involving combinatorial mathematics and compressed binary formats), this project uses **Fathom** — an open-source C library that handles the low-level probing. Fathom is the same library used as a reference implementation by many professional engines, and its correctness is well established.
+Rather than implementing the complex Syzygy file format from scratch (a significant undertaking involving combinatorial mathematics and compressed binary formats), this project uses **Fathom**, an open-source C library that handles the low-level probing. Fathom is the same library used as a reference implementation by many professional engines, and its correctness is well established.
 
 The integration has three layers:
 
@@ -38,9 +36,9 @@ The integration has three layers:
 
 There are two integration points in `Board.java`:
 
-**During search** — at every node in the search tree where the position has five or fewer pieces and no castling rights (castling is not represented in the tablebases), the engine calls `probeWdl()`. If the result is a win, draw, or loss, that value is returned immediately and the entire subtree below is discarded. This means the engine never wastes time searching endgame positions that are already solved. The win/draw/loss scores are carefully chosen to sit below the engine's checkmate scores, so a real forced checkmate is still preferred over a tablebase win, and the transposition table treats the two correctly.
+**During search**: at every node in the search tree where the position has five or fewer pieces and no castling rights (castling is not represented in the tablebases), the engine calls `probeWdl()`. If the result is a win, draw, or loss, that value is returned immediately and the entire subtree below is discarded. This means the engine never wastes time searching endgame positions that are already solved. The win/draw/loss scores are carefully chosen to sit below the engine's checkmate scores, so a real forced checkmate is still preferred over a tablebase win, and the transposition table treats the two correctly.
 
-**At the root** — before beginning the search for the engine's move, if the current position is already tablebase-covered, the engine calls `probeRoot()` instead of searching at all. Fathom returns the single best move: the one that preserves the win (or holds the draw) while minimising the distance to a capture or pawn move, keeping the engine safely within the 50-move rule. This is what produced results like "play `a1a4`, you will win in 21 moves" during testing.
+**At the root**: before beginning the search for the engine's move, if the current position is already tablebase-covered, the engine calls `probeRoot()` instead of searching at all. Fathom returns the single best move: the one that preserves the win (or holds the draw) while minimising the distance to a capture or pawn move, keeping the engine safely within the 50-move rule. This is what produced results like "play `a1a4`, you will win in 21 moves" during testing.
 
 A safety guard prevents the engine from probing illegal positions (where the side not to move is in check). Tablebases contain only legal positions, and probing an illegal one would cause the native code to crash. This guard ensures a hand-typed or unusual FEN loaded through the GUI can never crash the engine.
 

@@ -26,7 +26,7 @@ import java.util.List;
  */
 public final class UciOld {
 
-    private static final String ENGINE_NAME   = "Capstone Chess Engine (Old)";
+    private static final String ENGINE_NAME   = "Capstone Engine (v4.8)";
     private static final String ENGINE_AUTHOR = "Goldon Gao";
 
     private static final String STARTPOS_FEN =

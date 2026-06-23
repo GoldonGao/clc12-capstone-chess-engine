@@ -14,7 +14,7 @@ public class Board {
     private static final int KING_VALUE = 20000;
     private static final int CHECKMATE_SCORE = 100000;
     private static final int SEARCH_INFINITY = 1000000;
-    private static final int DEFAULT_MOVE_TIME_LIMIT_MILLIS = 2500;
+    private static final int DEFAULT_MOVE_TIME_LIMIT_MILLIS = 5000;
     private static final int DEFAULT_MAX_SEARCH_DEPTH = 5;
     private static final int CENTER_CONTROL_BONUS = 10;
     private static final int CENTER_PAWN_OCCUPATION_BONUS = 20;
