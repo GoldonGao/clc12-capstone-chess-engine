@@ -5,6 +5,8 @@ capstone project. It plays legal, strategic chess and can be run in three modes:
 graphical Swing interface, an interactive console, and a UCI-protocol interface
 compatible with professional chess GUIs such as Cute Chess and Arena.
 
+![Chess Engine GUI](screenshots/GUI.png)
+
 ---
 
 ## Features
