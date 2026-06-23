@@ -29,6 +29,14 @@ public final class Uci {
     private Thread searchThread;        // the in-flight search, if any (guarded by 'this')
 
     public static void main(String[] args) throws Exception {
+        // Optional: pre-load Syzygy tablebases from -DsyzygyPath=... so a launcher
+        // script can configure everything. A GUI can still override later via
+        // "setoption name SyzygyPath value ...". No-op if the path is unset or the
+        // native library/files are missing.
+        String syzygyPath = System.getProperty("syzygyPath", "");
+        if (!syzygyPath.isBlank()) {
+            SyzygyTablebase.init(syzygyPath);
+        }
         new Uci().run();
     }
 
